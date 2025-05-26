@@ -1,0 +1,27 @@
+# Versions exactes basées sur le script Google Colab qui fonctionne
+scikit-image==0.19.3
+pillow==9.5.0
+PyMCubes
+torch
+torchvision
+huggingface_hub
+opencv-python
+onnxruntime
+rembg
+pymeshlab
+omegaconf
+plyfile
+tqdm
+mcubes
+trimesh
+diffusers
+transformers
+accelerate
+safetensors
+
+# Dépendances supplémentaires pour TripoSR
+einops==0.7.0
+git+https://github.com/tatsy/torchmcubes.git
+xatlas==0.0.9
+moderngl==5.10.0
+imageio[ffmpeg] 

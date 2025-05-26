@@ -1,0 +1,41 @@
+# Core ML packages - versions compatibles avec Google Colab
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+pillow==9.5.0
+numpy>=1.21,<2.1
+scipy>=1.4.1
+
+# Image processing - versions compatibles Windows
+opencv-python>=4.5.0
+scikit-image>=0.20.0  # Version plus récente avec wheels précompilés
+imageio>=2.4.1
+tifffile>=2019.7.26
+PyWavelets>=1.1.1
+networkx>=2.2
+
+# 3D processing - versions compatibles
+pymeshlab>=2022.2
+PyMCubes>=0.1.6
+trimesh>=3.9.0
+plyfile>=0.7.0
+
+# Background removal
+rembg[gpu]>=2.0.0
+onnxruntime-gpu>=1.12.0
+
+# ML/AI frameworks
+huggingface_hub>=0.16.0
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.20.0
+safetensors>=0.3.0
+
+# Utilities
+omegaconf>=2.3.0
+tqdm>=4.65.0
+packaging>=20.0
+
+# Optional but recommended
+matplotlib>=3.5.0
+imageio-ffmpeg>=0.4.8 
