@@ -18,5 +18,15 @@
         "titleBar.inactiveBackground": "#efe3d299",
         "titleBar.inactiveForeground": "#15202b99"
     },
-    "peacock.color": "#efe3d2"
+    "peacock.color": "#efe3d2",
+    "cSpell.words": [
+        "mcubes",
+        "moderngl",
+        "pymesh",
+        "pymeshlab",
+        "rembg",
+        "stabilityai",
+        "triposr",
+        "xatlas"
+    ]
 }

@@ -1,6 +1,24 @@
-# Convertisseur PNG vers STL avec TripoSR - Version Locale
+# Convertisseur d'Images vers STL avec TripoSR - Version Locale
 
-Ce script permet de convertir des images PNG en modèles 3D STL en utilisant TripoSR, optimisé pour fonctionner localement avec une carte graphique NVIDIA (testé avec RTX 2070 Super).
+Ce script permet de convertir des images (PNG, WebP, JPEG, BMP, TIFF) en modèles 3D STL en utilisant TripoSR, optimisé pour fonctionner localement avec une carte graphique NVIDIA (testé avec RTX 2070 Super).
+
+## 📸 Formats d'images supportés
+
+- **PNG** - Avec transparence (format optimal)
+- **WebP** - Format moderne et léger
+- **JPEG/JPG** - Format standard
+- **BMP** - Format bitmap
+- **TIFF** - Format haute qualité
+
+_Le script détecte automatiquement le format et effectue la conversion nécessaire._
+
+## 🆕 Nouveautés
+
+### Support des vues multiples (recto + verso)
+
+- **Reconstruction améliorée** : Utilisez une image de recto ET une image de verso pour obtenir un modèle 3D plus précis et détaillé
+- **Qualité supérieure** : Les deux vues permettent au modèle de mieux comprendre la géométrie complète de l'objet
+- **Facilité d'usage** : Simple ajout du paramètre `--reverse-image`
 
 ## Prérequis
 
@@ -60,10 +78,33 @@ L'installation automatique va :
 
 ## Utilisation
 
-### Conversion basique
+### Reconstruction avec une seule vue (classique)
 
 ```bash
+# Image PNG classique
 python png-to-stl-local.py mon_image.png
+
+# Image WebP (format moderne)
+python png-to-stl-local.py photo.webp --remove-bg
+
+# Image JPEG
+python png-to-stl-local.py produit.jpg --remove-bg -o modeles/
+```
+
+### 🎯 Reconstruction avec deux vues (NOUVEAU)
+
+```bash
+# Reconstruction avec recto + verso pour un modèle plus précis
+python png-to-stl-local.py recto.png --reverse-image verso.png
+
+# Formats mixtes (PNG + WebP)
+python png-to-stl-local.py piece_face.png --reverse-image piece_pile.webp
+
+# Images JPEG avec suppression d'arrière-plan
+python png-to-stl-local.py avant.jpg --reverse-image arriere.jpg --remove-bg
+
+# Exemple complet avec formats différents
+python png-to-stl-local.py recto.webp --reverse-image verso.png --remove-bg -o modeles_2vues/
 ```
 
 ### Options disponibles
@@ -87,12 +128,11 @@ python png-to-stl-local.py mon_image.png -o resultats --remove-bg --no-video
 ```
 output/
 ├── 0/
-│   ├── input.png          # Image d'entrée traitée
+│   ├── input.png           # Image principale traitée
+│   ├── input_reverse.png   # Image de revers traitée (si fournie)
 │   ├── mesh.obj           # Modèle 3D au format OBJ
-│   ├── render_000.png     # Vues du modèle
-│   ├── render_001.png
-│   ├── ...
-│   └── render.mp4         # Vidéo de rotation du modèle
+│   ├── render.mp4         # Vidéo de rotation du modèle
+│   └── render_XXX.png     # Images de rendu (30 vues)
 └── votre_image.stl        # Fichier STL final
 ```
 
@@ -100,7 +140,9 @@ output/
 
 1. **Images recommandées** :
 
-   - Format PNG avec fond transparent ou uni
+   - **PNG** : Idéal avec fond transparent
+   - **WebP** : Excellent compromis qualité/taille
+   - **JPEG** : Bon pour photos (utiliser --remove-bg)
    - Résolution entre 512x512 et 2048x2048
    - Objet bien centré et éclairé
    - Éviter les ombres portées
@@ -125,7 +167,11 @@ output/
   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
   ```
 
-### "Out of memory"
+### Fix torchmcubes
+
+- `pip install git+https://github.com/tatsy/torchmcubes.git@3aef8afa5f21b113afc4f4ea148baee850cbd472`
+
+  ### "Out of memory"
 
 - Fermez les autres applications utilisant le GPU
 - Redémarrez votre ordinateur
@@ -145,17 +191,26 @@ output/
 ## Exemples de commandes
 
 ```bash
-# Image simple avec fond blanc
+# Image PNG simple avec fond blanc
 python png-to-stl-local.py logo.png
 
-# Photo d'objet avec suppression du fond
-python png-to-stl-local.py produit.png --remove-bg -o modeles_3d
+# Image WebP moderne
+python png-to-stl-local.py image.webp --remove-bg
+
+# Photo JPEG d'objet avec suppression du fond
+python png-to-stl-local.py produit.jpg --remove-bg -o modeles_3d
 
 # Traitement rapide sans vidéo
 python png-to-stl-local.py sketch.png --no-video
 
-# Batch processing (créer un script batch)
+# Pièce de monnaie avec deux faces en formats différents
+python png-to-stl-local.py face.png --reverse-image pile.webp --remove-bg
+
+# Batch processing (créer un script batch pour PNG)
 for %f in (*.png) do python png-to-stl-local.py "%f" -o stl_files
+
+# Batch processing pour WebP
+for %f in (*.webp) do python png-to-stl-local.py "%f" --remove-bg -o stl_webp
 ```
 
 ## Limitations
