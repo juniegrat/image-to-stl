@@ -143,9 +143,11 @@ cython_debug/
 # Project specific
 # Generated output files
 output/
+output_hunyuan3d/
 *.stl
 *.obj
 *.mp4
+*.png
 
 # Large example files (keep smaller ones for documentation)
 examples/*.png
