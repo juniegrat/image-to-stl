@@ -112,10 +112,10 @@ class Hunyuan3DConverter:
         # Configuration spéciale pour pièces numismatiques (optimisée)
         self.coin_config = {
             'image_size': 1024,  # Résolution plus élevée pour capturer les détails fins
-            'guidance_scale': 7.5,  # Plus élevé pour forcer la circularité
-            'num_inference_steps': 50,  # Plus d'étapes pour plus de précision
-            'texture_guidance_scale': 2.0,  # Plus élevé pour les détails de texture
-            'texture_steps': 28,  # Plus d'étapes pour les détails fins
+            'guidance_scale': 15.0,  # Plus élevé pour forcer la circularité
+            'num_inference_steps': 100,  # Plus d'étapes pour plus de précision
+            'texture_guidance_scale': 6.0,  # Plus élevé pour les détails de texture
+            'texture_steps': 60,  # Plus d'étapes pour les détails fins
             'seed': 12345,  # Seed différent optimisé pour les pièces
             # Paramètres de rendu optimisés pour pièces
             'n_views': 36,  # Diviseur de 360° pour rotation parfaite
