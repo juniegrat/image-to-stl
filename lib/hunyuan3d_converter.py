@@ -165,6 +165,125 @@ class Hunyuan3DConverter:
             except ImportError:
                 print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
 
+    def enable_test_mode(self):
+        """Active le mode test ultra-rapide pour les tests et développement"""
+        print("⚡ Activation du mode TEST ultra-rapide")
+        print("   🚀 Résolution: 256x256 (vitesse maximale)")
+        print("   🚀 Guidance scale: 3.0 (minimal)")
+        print("   🚀 Steps: 20 (ultra-rapide)")
+        print("   🚀 Texture steps: 15 (minimal)")
+        print("   🚀 Rendus: 12 vues (au lieu de 36)")
+        print("   ⚡ OPTIMISÉ POUR TESTS - PAS POUR PRODUCTION")
+
+        # Configuration test ultra-rapide
+        self.config = {
+            # Paramètres de génération (ultra-rapides)
+            'image_size': 256,  # Très petite résolution pour vitesse
+            'guidance_scale': 3.0,  # Minimal pour vitesse
+            'num_inference_steps': 20,  # Très peu d'étapes
+            'texture_guidance_scale': 2.0,  # Minimal pour texture
+            'texture_steps': 15,  # Très peu d'étapes texture
+            'seed': 42,
+            # Paramètres de rendu (simplifiés)
+            'n_views': 12,  # Seulement 12 vues au lieu de 36
+            'elevation_deg': 10.0,  # Angle simple
+            'camera_distance': 2.0,  # Distance normale
+            'fovy_deg': 40.0,  # Angle standard
+            'height': 256,  # Petite résolution rendu
+            'width': 256,   # Petite résolution rendu
+            'fps': 15,  # Moins de FPS
+            'foreground_ratio': 0.85,
+            # Mode test
+            'test_mode': True,
+            'quick_render': True,
+            'skip_post_processing': True  # Éviter les traitements longs
+        }
+
+        # Initialiser rembg rapidement si pas déjà fait
+        if not self.rembg_session:
+            try:
+                import rembg
+                self.rembg_session = rembg.new_session(
+                    'u2net')  # Plus rapide que le défaut
+                print("   ✅ Session rembg rapide initialisée")
+            except ImportError:
+                print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
+
+    def enable_fast_mode(self):
+        """Active le mode rapide (compromis qualité/vitesse)"""
+        print("🏃 Activation du mode RAPIDE (compromis qualité/vitesse)")
+        print("   ⚡ Résolution: 512x512 (qualité correcte)")
+        print("   ⚡ Guidance scale: 7.0 (équilibré)")
+        print("   ⚡ Steps: 50 (raisonnable)")
+        print("   ⚡ Texture steps: 25 (équilibré)")
+        print("   ⚡ Rendus: 24 vues")
+
+        # Configuration rapide mais qualité correcte
+        self.config = {
+            'image_size': 512,  # Résolution intermédiaire
+            'guidance_scale': 7.0,  # Équilibré
+            'num_inference_steps': 50,  # Moitié du mode pièce
+            'texture_guidance_scale': 3.0,  # Équilibré
+            'texture_steps': 25,  # Moitié du mode pièce
+            'seed': 42,
+            # Paramètres de rendu équilibrés
+            'n_views': 24,  # 24 vues suffisantes
+            'elevation_deg': 12.0,
+            'camera_distance': 1.6,
+            'fovy_deg': 35.0,
+            'height': 512,
+            'width': 512,
+            'fps': 24,
+            'foreground_ratio': 0.90,
+            # Optimisations
+            'fast_mode': True,
+            'moderate_post_processing': True
+        }
+
+    def enable_ultra_mode(self):
+        """Active le mode ultra qualité (paramètres maximaux)"""
+        print("🌟 Activation du mode ULTRA qualité")
+        print("   🎯 Résolution: 1024x1024 (haute définition)")
+        print("   🎯 Guidance scale: 20.0 (précision maximale)")
+        print("   🎯 Steps: 150 (qualité ultime)")
+        print("   🎯 Texture steps: 80 (détails fins)")
+        print("   🎯 Rendus: 48 vues (rendu premium)")
+        print("   🌟 QUALITÉ MAXIMALE - TEMPS DE RENDU ÉLEVÉ")
+
+        # Configuration ultra qualité
+        self.config = {
+            'image_size': 1024,  # Haute résolution
+            'guidance_scale': 20.0,  # Très élevé pour précision maximale
+            'num_inference_steps': 150,  # Beaucoup d'étapes
+            'texture_guidance_scale': 8.0,  # Très élevé pour texture
+            'texture_steps': 80,  # Beaucoup d'étapes texture
+            'seed': 12345,
+            # Paramètres de rendu premium
+            'n_views': 48,  # Plus de vues pour plus de détails
+            'elevation_deg': 20.0,  # Angle optimal
+            'camera_distance': 1.4,  # Très proche pour détails
+            'fovy_deg': 25.0,  # Angle serré
+            'height': 1024,
+            'width': 1024,
+            'fps': 30,
+            'foreground_ratio': 0.98,  # Ratio maximum
+            # Optimisations qualité
+            'ultra_mode': True,
+            'max_post_processing': True,
+            'anti_aliasing': True,
+            'detail_preservation': True
+        }
+
+        # Initialiser rembg avec le meilleur modèle
+        if not self.rembg_session:
+            try:
+                import rembg
+                self.rembg_session = rembg.new_session(
+                    'u2net')  # Meilleur modèle
+                print("   ✅ Session rembg premium initialisée")
+            except ImportError:
+                print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
+
     def disable_coin_mode(self):
         """Désactive le mode pièce (retour aux paramètres par défaut)"""
         print("🔄 Désactivation du mode pièce - retour aux paramètres par défaut")

@@ -50,6 +50,10 @@ def main():
                         help="Forcer le mode sans texture (pour éviter les erreurs)")
     parser.add_argument("--info", action="store_true",
                         help="Afficher les informations sur Hunyuan3D-2")
+    parser.add_argument("--quality",
+                        choices=["low", "medium", "high", "ultra"],
+                        default="high",
+                        help="🎯 Niveau de qualité: low=test rapide (256px,20steps), medium=équilibré (512px,50steps), high=optimal (1024px,100steps), ultra=maximum (1024px,150steps)")
 
     args = parser.parse_args()
 
@@ -88,9 +92,15 @@ def main():
             disable_texture=args.force_no_texture or args.texture_only
         )
 
-        # Activer le mode pièce optimisé si pas désactivé
-        if not args.disable_coin_mode:
-            converter.enable_coin_mode()
+        # Appliquer le niveau de qualité demandé
+        if args.quality == "low":
+            converter.enable_test_mode()  # Ultra-rapide pour tests
+        elif args.quality == "medium":
+            converter.enable_fast_mode()  # Équilibré
+        elif args.quality == "ultra":
+            converter.enable_ultra_mode()  # Qualité maximale
+        elif args.quality == "high" and not args.disable_coin_mode:
+            converter.enable_coin_mode()  # Mode pièce optimisé (défaut)
 
         # Vérifier l'environnement
         converter.check_environment()
