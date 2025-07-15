@@ -48,6 +48,8 @@ def main():
                         help="Générer uniquement la forme (pas de texture)")
     parser.add_argument("--force-no-texture", action="store_true",
                         help="Forcer le mode sans texture (pour éviter les erreurs)")
+    parser.add_argument("--vertex-colors", action="store_true",
+                        help="🚀 Mode couleurs de vertices rapide (2-5s au lieu de 8+ min)")
     parser.add_argument("--info", action="store_true",
                         help="Afficher les informations sur Hunyuan3D-2")
     parser.add_argument("--quality",
@@ -104,6 +106,19 @@ def main():
         elif args.quality == "high" and not args.disable_coin_mode:
             converter.enable_coin_mode()  # Mode pièce optimisé (défaut)
 
+        # Afficher le mode de couleur choisi
+        if args.vertex_colors:
+            print("🚀 Mode VERTEX COLORS activé")
+            print("   ⚡ Couleurs rapides basées sur l'image d'entrée (2-5s)")
+            print("   💡 Alternative ultra-rapide à la texture complète")
+        elif args.force_no_texture:
+            print("🔘 Mode SANS COULEUR activé")
+            print("   ⚡ Génération ultra-rapide sans texture ni couleur")
+        else:
+            print("🎨 Mode TEXTURE COMPLÈTE activé")
+            print("   🕐 Génération de texture haute qualité (8+ minutes)")
+            print("   💡 Utilisez --vertex-colors pour un mode plus rapide")
+
         # Vérifier l'environnement
         converter.check_environment()
 
@@ -130,7 +145,8 @@ def main():
             output_dir=args.output,
             remove_background=args.remove_background,
             render_video=not args.no_video,
-            enable_post_processing=not args.no_post_processing
+            enable_post_processing=not args.no_post_processing,
+            use_vertex_colors=args.vertex_colors
         )
 
         if stl_path:

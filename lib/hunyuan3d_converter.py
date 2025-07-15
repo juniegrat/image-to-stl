@@ -631,7 +631,7 @@ class Hunyuan3DConverter:
     def apply_texture(self, mesh: trimesh.Trimesh,
                       reference_image: Image.Image) -> trimesh.Trimesh:
         """
-        Applique une texture au mesh avec loading bar
+        Applique une texture au mesh avec timer
 
         Args:
             mesh: Mesh 3D de base
@@ -647,49 +647,125 @@ class Hunyuan3DConverter:
             return mesh
 
         try:
-            # Préparer les paramètres de texture avec progress bar simulé
+            # Préparer les paramètres de texture
             texture_steps = self.config.get('texture_steps', 40)
+            guidance_scale = self.config.get('texture_guidance_scale', 2.0)
 
-            print(f"   🔄 Application de texture ({texture_steps} steps)...")
+            print(
+                f"   🔄 Application de texture ({texture_steps} steps, guidance={guidance_scale})...")
+            print("   ⏱️  Démarrage du timer...")
 
-            # Créer une progress bar pour l'application de texture
-            with tqdm(total=texture_steps, desc="🎨 Application texture",
-                      unit="step", colour="magenta") as pbar:
+            # Démarrer le timer
+            start_time = time.time()
 
-                # Simuler le callback de progression pour la texture
-                def texture_callback(step, timestep, latents):
-                    pbar.update(1)
-                    pbar.set_postfix({"timestep": f"{timestep:.1f}"})
+            # Appeler le pipeline de texture sans callback
+            textured_mesh = self.texture_pipeline(
+                mesh,
+                image=reference_image,
+                guidance_scale=guidance_scale,
+                num_inference_steps=texture_steps
+            )
 
-                # Appeler le pipeline de texture avec callback si supporté
-                try:
-                    textured_mesh = self.texture_pipeline(
-                        mesh,
-                        image=reference_image,
-                        guidance_scale=self.config.get(
-                            'texture_guidance_scale', 2.0),
-                        num_inference_steps=texture_steps,
-                        callback=texture_callback,
-                        callback_steps=1
-                    )
-                except TypeError:
-                    # Fallback si le callback n'est pas supporté
-                    print("   ⚠️  Callback non supporté, application sans progress bar")
-                    textured_mesh = self.texture_pipeline(
-                        mesh,
-                        image=reference_image
-                    )
-                    # Simuler la progress bar manuellement
-                    for i in range(texture_steps):
-                        pbar.update(1)
-                        time.sleep(0.1)  # Simulation
-
+            # Calculer le temps écoulé
+            elapsed_time = time.time() - start_time
+            print(
+                f"   ⏱️  Texture appliquée en {elapsed_time:.1f}s ({elapsed_time/60:.1f}min)")
             print("   ✅ Texture appliquée avec succès")
             return textured_mesh
 
         except Exception as e:
             print(f"⚠️  Erreur application texture: {e}")
             print("   Retour au mesh sans texture")
+            return mesh
+
+    def apply_vertex_colors(self, mesh: trimesh.Trimesh, reference_image: Image.Image) -> trimesh.Trimesh:
+        """
+        Applique des couleurs de vertices rapides en échantillonnant les vraies couleurs de l'image
+
+        Args:
+            mesh: Mesh 3D de base
+            reference_image: Image de référence pour les couleurs
+
+        Returns:
+            Mesh avec couleurs de vertices (rapide, sans texture)
+        """
+        print("🎨 Application de couleurs de vertices (mode rapide)...")
+
+        try:
+            start_time = time.time()
+
+            # Convertir l'image en array numpy
+            if reference_image.mode != 'RGB':
+                reference_image = reference_image.convert('RGB')
+
+            img_array = np.array(reference_image).astype(np.float32) / 255.0
+            img_height, img_width = img_array.shape[:2]
+
+            # Calculer les normales des vertices si pas disponibles
+            if not hasattr(mesh, 'vertex_normals') or mesh.vertex_normals is None:
+                mesh.compute_vertex_normals()
+
+            # Projeter les vertices sur l'image 2D (vue frontale)
+            vertices = mesh.vertices
+
+            # Normaliser les coordonnées X,Y des vertices vers l'espace image [0,1]
+            # On utilise X,Y pour projeter sur l'image (Z = profondeur)
+            x_coords = vertices[:, 0]
+            y_coords = vertices[:, 1]
+
+            # Normaliser vers [0,1]
+            x_min, x_max = x_coords.min(), x_coords.max()
+            y_min, y_max = y_coords.min(), y_coords.max()
+
+            # Éviter division par zéro
+            x_range = x_max - x_min if x_max != x_min else 1.0
+            y_range = y_max - y_min if y_max != y_min else 1.0
+
+            u_coords = (x_coords - x_min) / x_range
+            v_coords = (y_coords - y_min) / y_range
+
+            # Convertir vers coordonnées de pixels
+            pixel_x = np.clip(u_coords * (img_width - 1),
+                              0, img_width - 1).astype(int)
+            pixel_y = np.clip(v_coords * (img_height - 1),
+                              0, img_height - 1).astype(int)
+
+            # Échantillonner les couleurs directement de l'image
+            sampled_colors = img_array[pixel_y, pixel_x]
+
+            # Ajouter un très léger effet de relief basé sur les normales (10% max)
+            if hasattr(mesh, 'vertex_normals') and mesh.vertex_normals is not None:
+                # Calculer un facteur de relief basé sur la normale Z (face avant)
+                relief_factor = np.abs(
+                    mesh.vertex_normals[:, 2])  # 0=profil, 1=face
+                # Pour broadcasting
+                relief_factor = relief_factor.reshape(-1, 1)
+
+                # Ajuster légèrement la luminosité selon le relief (±10%)
+                brightness_adjustment = 1.0 + (relief_factor - 0.5) * 0.2
+                final_colors = sampled_colors * brightness_adjustment
+            else:
+                final_colors = sampled_colors
+
+            # S'assurer que les couleurs sont dans la plage [0,1]
+            final_colors = np.clip(final_colors, 0.0, 1.0)
+
+            # Appliquer les couleurs au mesh (format 0-255)
+            mesh.visual.vertex_colors = (final_colors * 255).astype(np.uint8)
+
+            elapsed_time = time.time() - start_time
+            print(
+                f"   ⏱️  Couleurs de vertices appliquées en {elapsed_time:.1f}s")
+            print(
+                f"   ✅ {len(mesh.vertices)} vertices colorés avec vraies couleurs de l'image")
+            print(
+                f"   🎯 Projection: {img_width}x{img_height} → {len(mesh.vertices)} vertices")
+
+            return mesh
+
+        except Exception as e:
+            print(f"⚠️  Erreur application couleurs vertices: {e}")
+            print("   Retour au mesh sans couleurs")
             return mesh
 
     def render_video_with_utils(self, mesh: trimesh.Trimesh, output_dir: str = "output") -> Optional[str]:
@@ -1045,7 +1121,8 @@ class Hunyuan3DConverter:
                             output_dir: str = "output_hunyuan3d",
                             remove_background: bool = False,
                             render_video: bool = True,
-                            enable_post_processing: bool = False) -> Optional[str]:
+                            enable_post_processing: bool = False,
+                            use_vertex_colors: bool = False) -> Optional[str]:
         """
         Convertit une pièce (avers/revers) en STL avec utilitaires modulaires
 
@@ -1055,6 +1132,8 @@ class Hunyuan3DConverter:
             output_dir: Répertoire de sortie
             remove_background: Supprimer l'arrière-plan
             render_video: Générer une vidéo de rotation
+            enable_post_processing: Activer le post-processing du mesh
+            use_vertex_colors: Utiliser des couleurs de vertices rapides (2-5s au lieu de 8+ min)
 
         Returns:
             Chemin vers le fichier STL ou None en cas d'erreur
@@ -1080,12 +1159,22 @@ class Hunyuan3DConverter:
             print("❌ Échec génération mesh")
             return None
 
-        # Appliquer la texture
-        textured_mesh = self.apply_texture(mesh, images[0])
-
-        # Afficher les statistiques après texture
-        print(
-            f"   📊 Mesh avec texture: {len(textured_mesh.vertices)} vertices, {len(textured_mesh.faces)} faces")
+        # Appliquer la texture ou les couleurs de vertices selon le mode
+        if use_vertex_colors:
+            # Mode vertex colors rapide (quelques secondes)
+            colored_mesh = self.apply_vertex_colors(mesh, images[0])
+            print(
+                f"   📊 Mesh avec vertex colors: {len(colored_mesh.vertices)} vertices, {len(colored_mesh.faces)} faces")
+        elif not self.disable_texture and self.texture_pipeline:
+            # Mode texture complet (8+ minutes)
+            colored_mesh = self.apply_texture(mesh, images[0])
+            print(
+                f"   📊 Mesh avec texture: {len(colored_mesh.vertices)} vertices, {len(colored_mesh.faces)} faces")
+        else:
+            # Mode sans couleur ni texture (ultra-rapide)
+            colored_mesh = mesh
+            print(
+                f"   📊 Mesh sans couleur: {len(colored_mesh.vertices)} vertices, {len(colored_mesh.faces)} faces")
 
         # Post-traiter le mesh si activé
         skip_post_processing = self.config.get('skip_post_processing', False)
@@ -1094,18 +1183,18 @@ class Hunyuan3DConverter:
         if debug_mode:
             print("🔄 Mode DEBUG - aucun post-processing (mesh brut instantané)")
             print(
-                f"   ⚡ Économie maximale: {len(textured_mesh.vertices)} vertices préservés")
-            final_mesh = textured_mesh
+                f"   ⚡ Économie maximale: {len(colored_mesh.vertices)} vertices préservés")
+            final_mesh = colored_mesh
         elif enable_post_processing and not skip_post_processing:
             print("🔄 Post-processing activé (peut ajouter des vertices)")
-            final_mesh = self.post_process_mesh(textured_mesh)
+            final_mesh = self.post_process_mesh(colored_mesh)
         elif skip_post_processing:
             print("🔄 Post-processing désactivé en mode test (préserve le mesh)")
             print(f"   💡 Économie: pas d'ajout de vertices supplémentaires")
-            final_mesh = textured_mesh
+            final_mesh = colored_mesh
         else:
             print("🔄 Post-processing désactivé - préservation maximale des détails")
-            final_mesh = textured_mesh
+            final_mesh = colored_mesh
 
         # Convertir en STL
         stl_path = Path(output_dir) / "coin_model.stl"
@@ -1137,7 +1226,8 @@ def convert_coin_hunyuan3d(front_image: str, back_image: str = None,
                            model_path: str = "tencent/Hunyuan3D-2",
                            remove_background: bool = False,
                            render_video: bool = True,
-                           enable_post_processing: bool = False) -> Optional[str]:
+                           enable_post_processing: bool = False,
+                           use_vertex_colors: bool = False) -> Optional[str]:
     """
     Fonction de convenance pour convertir une pièce avec Hunyuan3D-2mv
 
@@ -1148,6 +1238,8 @@ def convert_coin_hunyuan3d(front_image: str, back_image: str = None,
         model_path: Chemin vers le modèle Hunyuan3D
         remove_background: Supprimer l'arrière-plan
         render_video: Générer une vidéo de rotation
+        enable_post_processing: Activer le post-processing du mesh
+        use_vertex_colors: Utiliser des couleurs de vertices rapides (2-5s au lieu de 8+ min)
 
     Returns:
         Chemin vers le fichier STL ou None en cas d'erreur
@@ -1165,7 +1257,7 @@ def convert_coin_hunyuan3d(front_image: str, back_image: str = None,
 
     # Convertir
     return converter.convert_coin_to_stl(
-        front_image, back_image, output_dir, remove_background, render_video, enable_post_processing
+        front_image, back_image, output_dir, remove_background, render_video, enable_post_processing, use_vertex_colors
     )
 
 
