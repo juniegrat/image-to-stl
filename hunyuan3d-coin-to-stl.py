@@ -51,9 +51,9 @@ def main():
     parser.add_argument("--info", action="store_true",
                         help="Afficher les informations sur Hunyuan3D-2")
     parser.add_argument("--quality",
-                        choices=["low", "medium", "high", "ultra"],
+                        choices=["debug", "low", "medium", "high", "ultra"],
                         default="high",
-                        help="🎯 Niveau de qualité: low=test rapide (256px,20steps), medium=équilibré (512px,50steps), high=optimal (1024px,100steps), ultra=maximum (1024px,150steps)")
+                        help="🎯 Niveau de qualité: debug=ultra-minimal (128px,5steps,flat), low=test rapide (256px,10steps), medium=équilibré (512px,50steps), high=optimal (1024px,100steps), ultra=maximum (1024px,150steps)")
 
     args = parser.parse_args()
 
@@ -93,7 +93,9 @@ def main():
         )
 
         # Appliquer le niveau de qualité demandé
-        if args.quality == "low":
+        if args.quality == "debug":
+            converter.enable_debug_mode()  # Ultra-minimal pour tests instantanés
+        elif args.quality == "low":
             converter.enable_test_mode()  # Ultra-rapide pour tests
         elif args.quality == "medium":
             converter.enable_fast_mode()  # Équilibré

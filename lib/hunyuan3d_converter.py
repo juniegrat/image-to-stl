@@ -95,6 +95,8 @@ class Hunyuan3DConverter:
             'image_size': 512,
             'guidance_scale': 12.0,  # Augmenté de 7.5 pour plus de fidélité aux détails
             'num_inference_steps': 75,  # Augmenté de 50 pour plus de précision
+            'octree_resolution': 256,  # Résolution mesh standard
+            'num_chunks': 8000,  # Complexité standard
             'texture_guidance_scale': 4.0,  # Augmenté de 2.0 pour une meilleure texture
             'texture_steps': 40,  # Augmenté de 28 pour plus de détails de texture
             'seed': 42,
@@ -114,6 +116,8 @@ class Hunyuan3DConverter:
             'image_size': 1024,  # Résolution plus élevée pour capturer les détails fins
             'guidance_scale': 15.0,  # Plus élevé pour forcer la circularité
             'num_inference_steps': 100,  # Plus d'étapes pour plus de précision
+            'octree_resolution': 380,  # Résolution mesh élevée pour détails
+            'num_chunks': 20000,  # Complexité élevée pour pièces
             'texture_guidance_scale': 6.0,  # Plus élevé pour les détails de texture
             'texture_steps': 60,  # Plus d'étapes pour les détails fins
             'seed': 12345,  # Seed différent optimisé pour les pièces
@@ -169,34 +173,39 @@ class Hunyuan3DConverter:
         """Active le mode test ultra-rapide pour les tests et développement"""
         print("⚡ Activation du mode TEST ultra-rapide")
         print("   🚀 Résolution: 256x256 (vitesse maximale)")
-        print("   🚀 Guidance scale: 3.0 (minimal)")
-        print("   🚀 Steps: 20 (ultra-rapide)")
-        print("   🚀 Texture steps: 15 (minimal)")
-        print("   🚀 Rendus: 12 vues (au lieu de 36)")
+        print("   🚀 Guidance scale: 2.0 (très minimal)")
+        print("   🚀 Steps: 10 (ultra-rapide)")
+        print("   🚀 Octree resolution: 64 (mesh très simple)")
+        print("   🚀 Chunks: 1000 (complexité minimale)")
+        print("   🚀 Texture steps: 8 (minimal)")
+        print("   🚀 Rendus: 8 vues (au lieu de 36)")
         print("   ⚡ OPTIMISÉ POUR TESTS - PAS POUR PRODUCTION")
 
-        # Configuration test ultra-rapide
+        # Configuration test ultra-rapide et agressive
         self.config = {
             # Paramètres de génération (ultra-rapides)
             'image_size': 256,  # Très petite résolution pour vitesse
-            'guidance_scale': 3.0,  # Minimal pour vitesse
-            'num_inference_steps': 20,  # Très peu d'étapes
-            'texture_guidance_scale': 2.0,  # Minimal pour texture
-            'texture_steps': 15,  # Très peu d'étapes texture
+            'guidance_scale': 2.0,  # Plus bas que 3.0
+            'num_inference_steps': 10,  # Très peu d'étapes
+            'octree_resolution': 64,  # NOUVEAU: Résolution mesh très basse
+            'num_chunks': 1000,  # NOUVEAU: Complexité minimale
+            'texture_guidance_scale': 1.5,  # Minimal pour texture
+            'texture_steps': 8,  # Très peu d'étapes texture
             'seed': 42,
             # Paramètres de rendu (simplifiés)
-            'n_views': 12,  # Seulement 12 vues au lieu de 36
-            'elevation_deg': 10.0,  # Angle simple
-            'camera_distance': 2.0,  # Distance normale
-            'fovy_deg': 40.0,  # Angle standard
+            'n_views': 8,  # Seulement 8 vues au lieu de 36
+            'elevation_deg': 0.0,  # Angle simple
+            'camera_distance': 2.5,  # Distance normale
+            'fovy_deg': 45.0,  # Angle standard
             'height': 256,  # Petite résolution rendu
             'width': 256,   # Petite résolution rendu
-            'fps': 15,  # Moins de FPS
-            'foreground_ratio': 0.85,
-            # Mode test
+            'fps': 12,  # Moins de FPS
+            'foreground_ratio': 0.8,
+            # Mode test agressif
             'test_mode': True,
             'quick_render': True,
-            'skip_post_processing': True  # Éviter les traitements longs
+            'skip_post_processing': True,  # Éviter les traitements longs
+            'low_precision': True,  # Utiliser une précision réduite
         }
 
         # Initialiser rembg rapidement si pas déjà fait
@@ -208,6 +217,51 @@ class Hunyuan3DConverter:
                 print("   ✅ Session rembg rapide initialisée")
             except ImportError:
                 print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
+
+    def enable_debug_mode(self):
+        """Active le mode debug ultra-minimal pour tests instantanés"""
+        print("⚡ Activation du mode DEBUG (modèle lisse et simple)")
+        print("   🚀 Résolution: 256x256 (minimal mais cohérent)")
+        print("   🚀 Guidance scale: 3.0 (minimal mais forme reconnaissable)")
+        print("   🚀 Steps: 15 (rapide mais évite les artefacts)")
+        print("   🚀 Octree resolution: 96 (mesh simple mais lisse)")
+        print("   🚀 Chunks: 1500 (complexité simple)")
+        print("   🚀 Texture steps: 8 (minimal)")
+        print("   🚀 Rendus: 8 vues seulement")
+        print("   🚀 Mode flat: mesh lisse avec minimum de vertices")
+        print("   ⚡ OPTIMISÉ POUR TESTS RAPIDES AVEC MODÈLE COHÉRENT")
+
+        # Configuration debug équilibrée : rapide mais pas d'artefacts
+        self.config = {
+            # Paramètres de génération (rapides mais cohérents)
+            'image_size': 256,  # Petite résolution mais pas trop
+            'guidance_scale': 3.0,  # Assez pour une forme reconnaissable
+            'num_inference_steps': 15,  # Suffisant pour éviter les artefacts
+            'octree_resolution': 96,  # Résolution mesh simple mais lisse
+            'num_chunks': 1500,  # Complexité simple mais suffisante
+            'texture_guidance_scale': 2.0,  # Minimal mais fonctionnel
+            'texture_steps': 8,  # Peu d'étapes texture
+            'seed': 42,
+            # Paramètres de rendu (simplifiés mais corrects)
+            'n_views': 8,  # 8 vues suffisantes pour debug
+            'elevation_deg': 5.0,  # Léger angle pour voir la forme
+            'camera_distance': 2.0,  # Distance raisonnable
+            'fovy_deg': 40.0,  # Angle standard
+            'height': 256,  # Petite résolution rendu
+            'width': 256,   # Petite résolution rendu
+            'fps': 12,  # FPS réduit
+            'foreground_ratio': 0.8,
+            # Mode debug équilibré
+            'debug_mode': True,
+            'quick_render': True,
+            'skip_post_processing': True,  # Éviter les traitements longs
+            'simple_mesh': True,  # Mesh simple mais lisse
+            'preserve_shape': True,  # Préserver la forme de base
+            'minimal_vertices': True,  # Nombre minimal de vertices
+        }
+
+        # Pas besoin de rembg en mode debug
+        print("   🚀 Suppression arrière-plan désactivée en mode debug")
 
     def enable_fast_mode(self):
         """Active le mode rapide (compromis qualité/vitesse)"""
@@ -223,6 +277,8 @@ class Hunyuan3DConverter:
             'image_size': 512,  # Résolution intermédiaire
             'guidance_scale': 7.0,  # Équilibré
             'num_inference_steps': 50,  # Moitié du mode pièce
+            'octree_resolution': 192,  # Résolution mesh réduite
+            'num_chunks': 5000,  # Complexité réduite
             'texture_guidance_scale': 3.0,  # Équilibré
             'texture_steps': 25,  # Moitié du mode pièce
             'seed': 42,
@@ -255,6 +311,8 @@ class Hunyuan3DConverter:
             'image_size': 1024,  # Haute résolution
             'guidance_scale': 20.0,  # Très élevé pour précision maximale
             'num_inference_steps': 150,  # Beaucoup d'étapes
+            'octree_resolution': 512,  # Résolution mesh très élevée
+            'num_chunks': 30000,  # Complexité maximale
             'texture_guidance_scale': 8.0,  # Très élevé pour texture
             'texture_steps': 80,  # Beaucoup d'étapes texture
             'seed': 12345,
@@ -292,6 +350,8 @@ class Hunyuan3DConverter:
             'image_size': 512,
             'guidance_scale': 12.0,
             'num_inference_steps': 75,
+            'octree_resolution': 256,  # Résolution mesh standard
+            'num_chunks': 8000,  # Complexité standard
             'texture_guidance_scale': 4.0,
             'texture_steps': 40,
             'seed': 42,
@@ -524,9 +584,12 @@ class Hunyuan3DConverter:
                         image=images,
                         guidance_scale=self.config['guidance_scale'],
                         num_inference_steps=self.config['num_inference_steps'],
+                        octree_resolution=self.config['octree_resolution'],
+                        num_chunks=self.config['num_chunks'],
                         generator=generator,
                         callback=callback,
-                        callback_steps=1
+                        callback_steps=1,
+                        output_type='trimesh'
                     )[0]
                 else:
                     # Mode single view
@@ -540,9 +603,12 @@ class Hunyuan3DConverter:
                         image=images[0],
                         guidance_scale=self.config['guidance_scale'],
                         num_inference_steps=self.config['num_inference_steps'],
+                        octree_resolution=self.config['octree_resolution'],
+                        num_chunks=self.config['num_chunks'],
                         generator=generator,
                         callback=callback,
-                        callback_steps=1
+                        callback_steps=1,
+                        output_type='trimesh'
                     )[0]
 
             # Statistiques du mesh
@@ -581,14 +647,42 @@ class Hunyuan3DConverter:
             return mesh
 
         try:
-            # Appliquer la texture
-            print("   🔄 Application de la texture en cours...")
+            # Préparer les paramètres de texture avec progress bar simulé
+            texture_steps = self.config.get('texture_steps', 40)
 
-            # Appeler le pipeline de texture avec les paramètres supportés uniquement
-            textured_mesh = self.texture_pipeline(
-                mesh,
-                image=reference_image
-            )
+            print(f"   🔄 Application de texture ({texture_steps} steps)...")
+
+            # Créer une progress bar pour l'application de texture
+            with tqdm(total=texture_steps, desc="🎨 Application texture",
+                      unit="step", colour="magenta") as pbar:
+
+                # Simuler le callback de progression pour la texture
+                def texture_callback(step, timestep, latents):
+                    pbar.update(1)
+                    pbar.set_postfix({"timestep": f"{timestep:.1f}"})
+
+                # Appeler le pipeline de texture avec callback si supporté
+                try:
+                    textured_mesh = self.texture_pipeline(
+                        mesh,
+                        image=reference_image,
+                        guidance_scale=self.config.get(
+                            'texture_guidance_scale', 2.0),
+                        num_inference_steps=texture_steps,
+                        callback=texture_callback,
+                        callback_steps=1
+                    )
+                except TypeError:
+                    # Fallback si le callback n'est pas supporté
+                    print("   ⚠️  Callback non supporté, application sans progress bar")
+                    textured_mesh = self.texture_pipeline(
+                        mesh,
+                        image=reference_image
+                    )
+                    # Simuler la progress bar manuellement
+                    for i in range(texture_steps):
+                        pbar.update(1)
+                        time.sleep(0.1)  # Simulation
 
             print("   ✅ Texture appliquée avec succès")
             return textured_mesh
@@ -621,17 +715,29 @@ class Hunyuan3DConverter:
             height = self.config['height']
             width = self.config['width']
             fps = self.config['fps']
+            debug_mode = self.config.get('debug_mode', False)
 
             # Préparer le mesh avec l'orientation standard
             oriented_mesh = mesh.copy()
             oriented_mesh = to_gradio_3d_orientation(oriented_mesh)
-            oriented_mesh = normalize_mesh(oriented_mesh)
+
+            # Normaliser seulement si pas en mode debug (pour économiser du temps)
+            if not debug_mode:
+                oriented_mesh = normalize_mesh(oriented_mesh)
+            else:
+                print("   ⚡ Mode DEBUG - normalisation désactivée pour vitesse")
 
             render_images = []
 
-            print(f"   📹 Rendu de {n_views} vues du mesh Hunyuan3D...")
+            if debug_mode:
+                print(
+                    f"   📹 Rendu DEBUG ultra-rapide: {n_views} vues minimalistes...")
+            else:
+                print(f"   📹 Rendu de {n_views} vues du mesh Hunyuan3D...")
+
             from tqdm import tqdm
-            with tqdm(total=n_views, desc="🎬 Rendu mesh Hunyuan3D", unit="vue", colour="cyan") as pbar:
+            desc = "⚡ DEBUG ultra-rapide" if debug_mode else "🎬 Rendu mesh Hunyuan3D"
+            with tqdm(total=n_views, desc=desc, unit="vue", colour="cyan") as pbar:
                 for i in range(n_views):
                     # Calculer l'azimuth pour cette vue
                     azimuth_deg = 360.0 * i / n_views
@@ -908,8 +1014,19 @@ class Hunyuan3DConverter:
         print("📦 Conversion en STL...")
 
         try:
-            # Post-traiter le mesh
-            processed_mesh = self.post_process_mesh(mesh)
+            # Post-traiter le mesh seulement si autorisé
+            debug_mode = self.config.get('debug_mode', False)
+            skip_post_processing = self.config.get(
+                'skip_post_processing', False)
+
+            if debug_mode:
+                print("   ⚡ Mode DEBUG - export direct sans post-processing")
+                processed_mesh = mesh
+            elif skip_post_processing:
+                print("   ⚡ Mode TEST - export direct sans post-processing")
+                processed_mesh = mesh
+            else:
+                processed_mesh = self.post_process_mesh(mesh)
 
             # Exporter en STL
             processed_mesh.export(output_path)
@@ -966,10 +1083,26 @@ class Hunyuan3DConverter:
         # Appliquer la texture
         textured_mesh = self.apply_texture(mesh, images[0])
 
+        # Afficher les statistiques après texture
+        print(
+            f"   📊 Mesh avec texture: {len(textured_mesh.vertices)} vertices, {len(textured_mesh.faces)} faces")
+
         # Post-traiter le mesh si activé
-        if enable_post_processing:
-            print("🔄 Post-processing simplifié (évite les blocages)")
+        skip_post_processing = self.config.get('skip_post_processing', False)
+        debug_mode = self.config.get('debug_mode', False)
+
+        if debug_mode:
+            print("🔄 Mode DEBUG - aucun post-processing (mesh brut instantané)")
+            print(
+                f"   ⚡ Économie maximale: {len(textured_mesh.vertices)} vertices préservés")
+            final_mesh = textured_mesh
+        elif enable_post_processing and not skip_post_processing:
+            print("🔄 Post-processing activé (peut ajouter des vertices)")
             final_mesh = self.post_process_mesh(textured_mesh)
+        elif skip_post_processing:
+            print("🔄 Post-processing désactivé en mode test (préserve le mesh)")
+            print(f"   💡 Économie: pas d'ajout de vertices supplémentaires")
+            final_mesh = textured_mesh
         else:
             print("🔄 Post-processing désactivé - préservation maximale des détails")
             final_mesh = textured_mesh
