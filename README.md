@@ -1,233 +1,167 @@
-# Convertisseur d'Images vers STL avec TripoSR - Version Locale
+# Image to STL Converter
 
-Ce script permet de convertir des images (PNG, WebP, JPEG, BMP, TIFF) en modèles 3D STL en utilisant TripoSR, optimisé pour fonctionner localement avec une carte graphique NVIDIA (testé avec RTX 2070 Super).
+Convertit des images en modèles STL 3D imprimables, avec support pour TripoSR et Hunyuan3D-2.
 
-## 📸 Formats d'images supportés
+## 🚀 Fonctionnalités
 
-- **PNG** - Avec transparence (format optimal)
-- **WebP** - Format moderne et léger
-- **JPEG/JPG** - Format standard
-- **BMP** - Format bitmap
-- **TIFF** - Format haute qualité
+- **Conversion d'images en STL** : PNG, WebP, JPEG, BMP, TIFF
+- **Support multi-modèles** : TripoSR et Hunyuan3D-2mv
+- **Génération vidéo 360°** : Rotation automatique du modèle
+- **Post-processing avancé** : Optimisation pour impression 3D
+- **Compatibilité TripoSR** : Utilise les mêmes utilitaires de rendu
+- **Suppression d'arrière-plan** : Avec rembg intégré
+- **Mode multi-view** : Support avers/revers pour pièces
 
-_Le script détecte automatiquement le format et effectue la conversion nécessaire._
+## 📦 Installation
 
-## 🆕 Nouveautés
-
-### Support des vues multiples (recto + verso)
-
-- **Reconstruction améliorée** : Utilisez une image de recto ET une image de verso pour obtenir un modèle 3D plus précis et détaillé
-- **Qualité supérieure** : Les deux vues permettent au modèle de mieux comprendre la géométrie complète de l'objet
-- **Facilité d'usage** : Simple ajout du paramètre `--reverse-image`
-
-## Prérequis
-
-- Windows 10/11
-- Python 3.8 ou supérieur
-- NVIDIA GPU avec CUDA support (RTX 2070 Super ou équivalent)
-- CUDA Toolkit 11.8 ou supérieur
-- Git
-- Au moins 8 GB de RAM
-- ~10 GB d'espace disque libre
-
-## Installation
-
-### 1. Installer CUDA Toolkit
-
-Téléchargez et installez CUDA Toolkit depuis le site NVIDIA :
-https://developer.nvidia.com/cuda-11-8-0-download-archive
-
-### 2. Cloner ce dépôt
+### 1. Cloner le projet
 
 ```bash
-git clone [votre-repo]
-cd png-to-stl
+git clone https://github.com/votre-repo/image-to-stl.git
+cd image-to-stl
 ```
 
-### 3. Créer un environnement virtuel (recommandé)
+### 2. Installer les dépendances
 
-```bash
-python -m venv venv
-# Sur Windows PowerShell
-.\venv\Scripts\Activate.ps1
-# Ou sur Windows CMD
-.\venv\Scripts\activate.bat
-```
-
-### 4. Installer les dépendances et configurer l'environnement
-
-**Option 1 - Installation automatique (recommandée) :**
-
-```bash
-python install.py
-```
-
-**Option 2 - Installation manuelle :**
+#### Pour TripoSR (recommandé)
 
 ```bash
 pip install -r requirements.txt
-python png-to-stl-local.py --setup
+python image-to-stl.py --setup
 ```
 
-L'installation automatique va :
-
-- Installer toutes les dépendances Python nécessaires dans le bon ordre
-- Éviter les problèmes de compilation
-- Cloner le dépôt TripoSR
-- Vérifier que tout fonctionne correctement
-
-## Utilisation
-
-### Reconstruction avec une seule vue (classique)
+#### Pour Hunyuan3D-2mv (haute fidélité)
 
 ```bash
-# Image PNG classique
-python png-to-stl-local.py mon_image.png
-
-# Image WebP (format moderne)
-python png-to-stl-local.py photo.webp --remove-bg
-
-# Image JPEG
-python png-to-stl-local.py produit.jpg --remove-bg -o modeles/
+pip install -r requirements-hunyuan3d.txt
+python hunyuan3d-coin-to-stl.py --setup
 ```
 
-### 🎯 Reconstruction avec deux vues (NOUVEAU)
+## 🔧 Utilisation
+
+### TripoSR (Standard)
 
 ```bash
-# Reconstruction avec recto + verso pour un modèle plus précis
-python png-to-stl-local.py recto.png --reverse-image verso.png
+# Conversion basique
+python image-to-stl.py image.png
 
-# Formats mixtes (PNG + WebP)
-python png-to-stl-local.py piece_face.png --reverse-image piece_pile.webp
+# Avec paramètres avancés
+python image-to-stl.py image.png --mc-resolution 512 --render-views 60
 
-# Images JPEG avec suppression d'arrière-plan
-python png-to-stl-local.py avant.jpg --reverse-image arriere.jpg --remove-bg
-
-# Exemple complet avec formats différents
-python png-to-stl-local.py recto.webp --reverse-image verso.png --remove-bg -o modeles_2vues/
+# Mode pièce avec avers/revers
+python image-to-stl.py avers.png --reverse-image revers.png
 ```
 
-### Options disponibles
+### Hunyuan3D-2mv (Haute fidélité avec compatibilité TripoSR)
 
 ```bash
-# Spécifier un dossier de sortie
-python png-to-stl-local.py mon_image.png -o mon_dossier_sortie
+# Conversion basique
+python hunyuan3d-coin-to-stl.py avers.png
 
-# Supprimer l'arrière-plan de l'image
-python png-to-stl-local.py mon_image.png --remove-bg
+# Avec paramètres TripoSR compatibles
+python hunyuan3d-coin-to-stl.py avers.png --n-views 60 --height 1024 --width 1024
 
-# Ne pas générer de vidéo de prévisualisation
-python png-to-stl-local.py mon_image.png --no-video
+# Mode multi-view avec suppression d'arrière-plan TripoSR
+python hunyuan3d-coin-to-stl.py avers.png -b revers.png --remove-bg
 
-# Combiner les options
-python png-to-stl-local.py mon_image.png -o resultats --remove-bg --no-video
+# Paramètres de caméra avancés (compatibles TripoSR)
+python hunyuan3d-coin-to-stl.py piece.png --camera-distance 2.5 --elevation-deg 15 --fovy-deg 50
 ```
 
-## Structure des fichiers de sortie
+## 🎬 Nouveaux paramètres de rendu (compatibles TripoSR)
 
-```
-output/
-├── 0/
-│   ├── input.png           # Image principale traitée
-│   ├── input_reverse.png   # Image de revers traitée (si fournie)
-│   ├── mesh.obj           # Modèle 3D au format OBJ
-│   ├── render.mp4         # Vidéo de rotation du modèle
-│   └── render_XXX.png     # Images de rendu (30 vues)
-└── votre_image.stl        # Fichier STL final
-```
+### Paramètres de caméra
 
-## Conseils d'utilisation
+- `--n-views` : Nombre de vues pour la vidéo (défaut: 30)
+- `--height` / `--width` : Résolution de rendu (défaut: 512x512)
+- `--elevation-deg` : Angle d'élévation en degrés (défaut: 0.0)
+- `--camera-distance` : Distance de la caméra (défaut: 1.9)
+- `--fovy-deg` : Champ de vision vertical (défaut: 40.0)
 
-1. **Images recommandées** :
+### Traitement d'image
 
-   - **PNG** : Idéal avec fond transparent
-   - **WebP** : Excellent compromis qualité/taille
-   - **JPEG** : Bon pour photos (utiliser --remove-bg)
-   - Résolution entre 512x512 et 2048x2048
-   - Objet bien centré et éclairé
-   - Éviter les ombres portées
+- `--foreground-ratio` : Ratio de l'objet dans l'image (défaut: 0.85)
+- `--remove-bg` : Suppression d'arrière-plan avec rembg (TripoSR)
 
-2. **Performance** :
-
-   - La première exécution télécharge le modèle TripoSR (~2GB)
-   - La génération prend généralement 1-3 minutes avec une RTX 2070 Super
-   - La suppression d'arrière-plan ajoute ~30 secondes
-
-3. **Mémoire GPU** :
-   - Le processus utilise environ 4-6 GB de VRAM
-   - Fermez les autres applications GPU-intensives
-
-## Dépannage
-
-### "CUDA non disponible"
-
-- Vérifiez l'installation de CUDA Toolkit
-- Réinstallez PyTorch avec support CUDA :
-  ```bash
-  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-  ```
-
-### Fix torchmcubes
-
-- `pip install git+https://github.com/tatsy/torchmcubes.git@3aef8afa5f21b113afc4f4ea148baee850cbd472`
-
-  ### "Out of memory"
-
-- Fermez les autres applications utilisant le GPU
-- Redémarrez votre ordinateur
-- Utilisez une image plus petite
-
-### "Module not found"
-
-- Réexécutez `python install.py` ou `python png-to-stl-local.py --setup`
-- Vérifiez que l'environnement virtuel est activé
-
-### Erreurs de compilation (scikit-image, etc.)
-
-- Utilisez le script d'installation automatique : `python install.py`
-- Ou installez une version précompilée : `pip install scikit-image>=0.20.0`
-- Assurez-vous d'avoir Visual Studio Build Tools installé
-
-## Exemples de commandes
+### Exemples d'utilisation avancée
 
 ```bash
-# Image PNG simple avec fond blanc
-python png-to-stl-local.py logo.png
+# Rendu haute qualité
+python hunyuan3d-coin-to-stl.py piece.png --n-views 120 --height 1024 --width 1024 --fps 60
 
-# Image WebP moderne
-python png-to-stl-local.py image.webp --remove-bg
+# Vue rapprochée avec angle
+python hunyuan3d-coin-to-stl.py piece.png --camera-distance 1.5 --elevation-deg 20
 
-# Photo JPEG d'objet avec suppression du fond
-python png-to-stl-local.py produit.jpg --remove-bg -o modeles_3d
-
-# Traitement rapide sans vidéo
-python png-to-stl-local.py sketch.png --no-video
-
-# Pièce de monnaie avec deux faces en formats différents
-python png-to-stl-local.py face.png --reverse-image pile.webp --remove-bg
-
-# Batch processing (créer un script batch pour PNG)
-for %f in (*.png) do python png-to-stl-local.py "%f" -o stl_files
-
-# Batch processing pour WebP
-for %f in (*.webp) do python png-to-stl-local.py "%f" --remove-bg -o stl_webp
+# Champ de vision large
+python hunyuan3d-coin-to-stl.py piece.png --fovy-deg 60 --remove-bg
 ```
 
-## Limitations
+## 🔄 Compatibilité TripoSR
 
-- Fonctionne mieux avec des objets simples et bien définis
-- Les détails très fins peuvent ne pas être bien capturés
-- Les textures et couleurs ne sont pas préservées dans le STL
-- La qualité dépend fortement de l'image d'entrée
+Les scripts Hunyuan3D utilisent maintenant les mêmes utilitaires que TripoSR :
 
-## Crédits
+### Fonctionnalités partagées
 
-Ce script est basé sur :
+- **Suppression d'arrière-plan** : `rembg` avec session réutilisable
+- **Redimensionnement** : `resize_foreground` avec ratio configurable
+- **Génération vidéo** : `save_video` avec imageio
+- **Paramètres de caméra** : Mêmes conventions que TripoSR
 
-- [TripoSR](https://github.com/VAST-AI-Research/TripoSR) par Stability AI
-- Tutoriel de [PyImageSearch](https://pyimagesearch.com/)
-- Adapté pour utilisation locale par [votre nom]
+### Avantages
 
-- [TripoSR issue 74](https://github.com/VAST-AI-Research/TripoSR/issues/74)
-- [PyImageSearch](https://pyimagesearch.com/2024/12/11/png-image-to-stl-converter-in-python)
-- [Colab](https://colab.research.google.com/drive/1S4-Xn3tW6_nLd0cWGHzbP1QBZuke6JRR)
+- **Cohérence** : Même comportement entre les deux systèmes
+- **Performance** : Réutilisation des optimisations TripoSR
+- **Maintenance** : Code unifié pour le rendu
+
+## 📊 Comparaison des modèles
+
+| Modèle        | Qualité    | Vitesse    | Multi-view | Texture    | Compatibilité TripoSR |
+| ------------- | ---------- | ---------- | ---------- | ---------- | --------------------- |
+| TripoSR       | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | ❌         | ⭐⭐⭐     | ✅ Natif              |
+| Hunyuan3D-2mv | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ✅         | ⭐⭐⭐⭐⭐ | ✅ Compatible         |
+
+## 🛠️ Diagnostic et dépannage
+
+### Vérifier l'environnement
+
+```bash
+# TripoSR
+python image-to-stl.py --debug
+
+# Hunyuan3D
+python hunyuan3d-coin-to-stl.py --setup
+```
+
+### Problèmes courants
+
+- **Mémoire GPU insuffisante** : Réduisez `--height` et `--width`
+- **Rendu lent** : Diminuez `--n-views`
+- **Qualité insuffisante** : Augmentez la résolution et utilisez `--remove-bg`
+
+## 📁 Structure du projet
+
+```
+image-to-stl/
+├── lib/
+│   ├── converter.py              # Convertisseur TripoSR
+│   ├── hunyuan3d_converter.py    # Convertisseur Hunyuan3D (compatible TripoSR)
+│   ├── image_processor.py        # Traitement d'images
+│   └── utils.py                  # Utilitaires partagés
+├── TripoSR/                      # Sous-module TripoSR
+├── image-to-stl.py              # Script principal TripoSR
+├── hunyuan3d-coin-to-stl.py     # Script Hunyuan3D compatible TripoSR
+└── requirements*.txt             # Dépendances
+```
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Veuillez :
+
+1. Maintenir la compatibilité TripoSR
+2. Tester avec les deux modèles
+3. Documenter les nouveaux paramètres
+4. Respecter les conventions de nommage TripoSR
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.

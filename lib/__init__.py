@@ -24,3 +24,10 @@ __all__ = [
     'clear_gpu_memory',
     'get_render_params'
 ]
+
+# Module de compatibilité pour Hunyuan3D
+try:
+    from .hunyuan3d_converter import Hunyuan3DConverter, convert_coin_hunyuan3d
+    __all__.extend(['Hunyuan3DConverter', 'convert_coin_hunyuan3d'])
+except ImportError:
+    pass  # Hunyuan3D optionnel
