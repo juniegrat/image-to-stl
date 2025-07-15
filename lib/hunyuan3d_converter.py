@@ -90,52 +90,25 @@ class Hunyuan3DConverter:
         self.shape_pipeline = None
         self.texture_pipeline = None
 
-        # Configuration par défaut
+        # Configuration par défaut (niveau "high" - optimisé pour pièces)
         self.config = {
-            'image_size': 512,
-            'guidance_scale': 12.0,  # Augmenté de 7.5 pour plus de fidélité aux détails
-            'num_inference_steps': 75,  # Augmenté de 50 pour plus de précision
-            'octree_resolution': 256,  # Résolution mesh standard
-            'num_chunks': 8000,  # Complexité standard
-            'texture_guidance_scale': 4.0,  # Augmenté de 2.0 pour une meilleure texture
-            'texture_steps': 40,  # Augmenté de 28 pour plus de détails de texture
-            'seed': 42,
-            # Paramètres de rendu
-            'n_views': 30,
-            'elevation_deg': 5.0,  # Changé de 0.0 pour mieux capturer la profondeur
-            'camera_distance': 1.7,  # Réduit de 1.9 pour plus de détails
-            'fovy_deg': 35.0,  # Réduit de 40.0 pour moins de distortion
-            'height': 512,  # Augmenté de 256 pour plus de détails
-            'width': 512,   # Augmenté de 256 pour plus de détails
-            'fps': 30,
-            'foreground_ratio': 0.90  # Augmenté de 0.85 pour mieux capturer l'objet
-        }
-
-        # Configuration spéciale pour pièces numismatiques (optimisée)
-        self.coin_config = {
-            'image_size': 1024,  # Résolution plus élevée pour capturer les détails fins
-            'guidance_scale': 15.0,  # Plus élevé pour forcer la circularité
+            'image_size': 1024,  # Résolution élevée pour capturer les détails fins
+            'guidance_scale': 15.0,  # Élevé pour une meilleure forme
             'num_inference_steps': 100,  # Plus d'étapes pour plus de précision
             'octree_resolution': 380,  # Résolution mesh élevée pour détails
-            'num_chunks': 20000,  # Complexité élevée pour pièces
-            'texture_guidance_scale': 6.0,  # Plus élevé pour les détails de texture
+            'num_chunks': 20000,  # Complexité élevée
+            'texture_guidance_scale': 6.0,  # Élevé pour les détails de texture
             'texture_steps': 60,  # Plus d'étapes pour les détails fins
-            'seed': 12345,  # Seed différent optimisé pour les pièces
-            # Paramètres de rendu optimisés pour pièces
+            'seed': 12345,
+            # Paramètres de rendu optimisés
             'n_views': 36,  # Diviseur de 360° pour rotation parfaite
-            'elevation_deg': 15.0,  # Angle optimal pour capturer la profondeur des pièces
+            'elevation_deg': 15.0,  # Angle optimal pour capturer la profondeur
             'camera_distance': 1.5,  # Plus proche pour capturer les détails
             'fovy_deg': 30.0,  # Angle de vue serré pour réduire la distortion
             'height': 1024,  # Résolution élevée pour les détails
             'width': 1024,   # Résolution élevée pour les détails
             'fps': 30,
-            'foreground_ratio': 0.95,  # Ratio élevé pour capturer toute la pièce
-            # Nouveaux paramètres spécifiques aux pièces
-            'coin_mode': True,
-            'circular_mask': True,  # Forcer la forme circulaire
-            'detail_preservation': True,  # Préserver les détails fins
-            'anti_aliasing': True,  # Réduire les artefacts
-            'smooth_edges': True,  # Lisser les bords pour une forme plus ronde
+            'foreground_ratio': 0.95  # Ratio élevé pour capturer tout l'objet
         }
 
         # Session rembg pour la suppression d'arrière-plan
@@ -145,29 +118,6 @@ class Hunyuan3DConverter:
         print(f"   Device: {self.device}")
         print(f"   Modèle forme: {self.model_path}")
         print(f"   Modèle texture: {self.texture_model_path}")
-
-    def enable_coin_mode(self):
-        """Active le mode pièce avec paramètres optimisés"""
-        print("🪙 Activation du mode pièce optimisé")
-        print("   ✅ Résolution: 1024x1024 (haute définition)")
-        print("   ✅ Guidance scale: 15.0 (circularité forcée)")
-        print("   ✅ Steps: 100 (précision maximale)")
-        print("   ✅ Angle caméra: 15° (optimal pour pièces)")
-        print("   ✅ Distance: 1.5 (capture détails fins)")
-        print("   ✅ Anti-aliasing activé")
-        print("   ✅ Lissage des bords activé")
-
-        # Remplacer la configuration par défaut
-        self.config = self.coin_config.copy()
-
-        # Initialiser rembg pour le mode pièce si pas déjà fait
-        if not self.rembg_session:
-            try:
-                import rembg
-                self.rembg_session = rembg.new_session()
-                print("   ✅ Session rembg initialisée pour suppression arrière-plan")
-            except ImportError:
-                print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
 
     def enable_test_mode(self):
         """Active le mode test ultra-rapide pour les tests et développement"""
@@ -341,29 +291,6 @@ class Hunyuan3DConverter:
                 print("   ✅ Session rembg premium initialisée")
             except ImportError:
                 print("   ⚠️  rembg non disponible, suppression arrière-plan désactivée")
-
-    def disable_coin_mode(self):
-        """Désactive le mode pièce (retour aux paramètres par défaut)"""
-        print("🔄 Désactivation du mode pièce - retour aux paramètres par défaut")
-        # Restaurer la configuration par défaut
-        self.config = {
-            'image_size': 512,
-            'guidance_scale': 12.0,
-            'num_inference_steps': 75,
-            'octree_resolution': 256,  # Résolution mesh standard
-            'num_chunks': 8000,  # Complexité standard
-            'texture_guidance_scale': 4.0,
-            'texture_steps': 40,
-            'seed': 42,
-            'n_views': 30,
-            'elevation_deg': 5.0,
-            'camera_distance': 1.7,
-            'fovy_deg': 35.0,
-            'height': 512,
-            'width': 512,
-            'fps': 30,
-            'foreground_ratio': 0.90
-        }
 
     def check_environment(self):
         """Vérifie l'environnement et les dépendances"""
@@ -953,129 +880,6 @@ class Hunyuan3DConverter:
             print(f"   ⚠️  Erreur post-processing: {e}")
             return mesh
 
-    def post_process_coin_mesh(self, mesh: trimesh.Trimesh) -> trimesh.Trimesh:
-        """
-        Post-traite le mesh spécifiquement pour les pièces numismatiques
-        Améliore la circularité et réduit les artefacts
-
-        Args:
-            mesh: Mesh d'entrée
-
-        Returns:
-            Mesh post-traité optimisé pour pièces
-        """
-        print("🪙 Post-processing spécialisé pour pièces numismatiques...")
-
-        try:
-            # Étape 1: Nettoyage basique mais approfondi
-            print("   🧹 Nettoyage approfondi du mesh...")
-            mesh.remove_duplicate_faces()
-            mesh.remove_degenerate_faces()
-            mesh.remove_unreferenced_vertices()
-            mesh.remove_infinite_values()
-
-            # Étape 2: Amélioration de la circularité si mode pièce activé
-            if self.config.get('coin_mode', False):
-                print("   🔄 Amélioration de la circularité...")
-
-                # Centrer le mesh parfaitement
-                mesh.vertices -= mesh.center_mass
-
-                # Projection cylindrique pour améliorer la circularité
-                vertices = mesh.vertices
-                xy_center = np.mean(vertices[:, :2], axis=0)
-
-                # Calculer le rayon moyen dans le plan XY
-                distances = np.linalg.norm(vertices[:, :2] - xy_center, axis=1)
-                mean_radius = np.mean(distances[distances > 0])
-
-                if mean_radius > 0:
-                    # Normaliser légèrement vers un cercle parfait (préservation 90% des détails)
-                    directions = vertices[:, :2] - xy_center
-                    current_distances = np.linalg.norm(directions, axis=1)
-
-                    # Éviter la division par zéro
-                    mask = current_distances > 1e-6
-                    normalized_directions = np.zeros_like(directions)
-                    normalized_directions[mask] = directions[mask] / \
-                        current_distances[mask, np.newaxis]
-
-                    # Appliquer une correction légère vers la circularité
-                    target_distances = current_distances * 0.9 + mean_radius * 0.1
-                    new_positions = xy_center + normalized_directions * \
-                        target_distances[:, np.newaxis]
-
-                    mesh.vertices[:, :2] = new_positions
-                    print(
-                        f"   ✅ Circularité améliorée (rayon moyen: {mean_radius:.3f})")
-
-            # Étape 3: Lissage adaptatif pour pièces
-            print("   🔄 Lissage adaptatif pour pièces...")
-            vertices_count = len(mesh.vertices)
-            faces_count = len(mesh.faces)
-
-            # Lissage plus agressif pour les pièces car on veut une surface lisse
-            if vertices_count > 0:
-                # Lissage modéré spécifiquement pour les pièces
-                # Plus élevé que le mode normal
-                mesh = mesh.smoothed(alpha=0.2)
-
-                # Lissage Laplacien léger pour réduire les artefacts
-                try:
-                    # Appliquer un lissage Laplacien simple
-                    for _ in range(2):  # 2 itérations légères
-                        new_vertices = mesh.vertices.copy()
-                        for i, vertex in enumerate(mesh.vertices):
-                            neighbors = []
-                            for face in mesh.faces:
-                                if i in face:
-                                    neighbors.extend(face)
-                            neighbors = list(set(neighbors))
-                            neighbors.remove(i)
-
-                            if neighbors:
-                                neighbor_avg = np.mean(
-                                    mesh.vertices[neighbors], axis=0)
-                                new_vertices[i] = vertex * \
-                                    0.8 + neighbor_avg * 0.2
-
-                        mesh.vertices = new_vertices
-
-                    print("   ✅ Lissage Laplacien appliqué")
-                except Exception as e:
-                    print(f"   ⚠️  Lissage Laplacien échoué: {e}")
-
-            # Étape 4: Réduction des artefacts de bord
-            if self.config.get('smooth_edges', False):
-                print("   🔄 Lissage des bords...")
-                # Identifier les vertices de bord et les lisser davantage
-                try:
-                    boundary_vertices = mesh.vertices[mesh.outline().vertices]
-                    if len(boundary_vertices) > 0:
-                        # Lisser les bords de manière circulaire
-                        center = np.mean(boundary_vertices, axis=0)
-                        for i in mesh.outline().vertices:
-                            current_pos = mesh.vertices[i]
-                            toward_center = (center - current_pos) * 0.1
-                            mesh.vertices[i] = current_pos + toward_center
-
-                        print("   ✅ Bords lissés")
-                except Exception as e:
-                    print(f"   ⚠️  Lissage des bords échoué: {e}")
-
-            # Étape 5: Normalisation finale
-            print("   🔄 Normalisation finale...")
-            mesh = normalize_mesh(mesh)
-
-            print(
-                f"   ✅ Mesh pièce optimisé: {len(mesh.vertices)} vertices, {len(mesh.faces)} faces")
-            return mesh
-
-        except Exception as e:
-            print(f"   ⚠️  Erreur post-processing pièce: {e}")
-            print("   🔄 Retour au post-processing standard...")
-            return self.post_process_mesh(mesh)
-
     def convert_to_stl(self, mesh: trimesh.Trimesh, output_path: str) -> bool:
         """
         Convertit le mesh en STL
@@ -1266,6 +1070,7 @@ def get_hunyuan3d_info():
     info = {
         'name': 'Hunyuan3D-2mv (complètement indépendant)',
         'description': 'Modèle de génération 3D multi-view avec rendu vidéo indépendant',
+        'version': '2.0 (nettoyé)',
         'features': [
             'Support multi-view (avers/revers)',
             'Génération haute résolution',
@@ -1273,8 +1078,15 @@ def get_hunyuan3d_info():
             'Rendu vidéo indépendant (sans TripoSR)',
             'Loading bars de progression',
             'Suppression arrière-plan',
-            'Optimisé pour pièces numismatiques',
+            'Modes qualité: debug, low, medium, high, ultra',
             'Complètement indépendant de TripoSR'
+        ],
+        'utils': [
+            'Utilitaires modulaires indépendants',
+            'Rendu vidéo sans TripoSR',
+            'Couleurs de vertices rapides',
+            'Post-processing optimisé',
+            'Configuration par niveaux de qualité'
         ],
         'requirements': [
             'CUDA 11.8+ (recommandé)',

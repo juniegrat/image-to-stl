@@ -40,14 +40,10 @@ def main():
                         help="Pas de génération vidéo")
     parser.add_argument("--no-post-processing", action="store_true",
                         help="Désactiver le post-processing")
-    parser.add_argument("--disable-coin-mode", action="store_true",
-                        help="Désactiver le mode pièce optimisé")
     parser.add_argument("--model-path", default="tencent/Hunyuan3D-2",
                         help="Chemin vers le modèle Hunyuan3D-2")
-    parser.add_argument("--texture-only", action="store_true",
+    parser.add_argument("--no-texture", action="store_true",
                         help="Générer uniquement la forme (pas de texture)")
-    parser.add_argument("--force-no-texture", action="store_true",
-                        help="Forcer le mode sans texture (pour éviter les erreurs)")
     parser.add_argument("--vertex-colors", action="store_true",
                         help="🚀 Mode couleurs de vertices rapide (2-5s au lieu de 8+ min)")
     parser.add_argument("--info", action="store_true",
@@ -83,7 +79,7 @@ def main():
 
     # Afficher l'en-tête
     print("🏛️  Convertisseur de Pièces vers STL avec Hunyuan3D-2")
-    print("   Génération de modèles 3D haute fidélité (mode pièce optimisé)")
+    print("   Génération de modèles 3D haute fidélité")
     print("=" * 70)
 
     try:
@@ -91,7 +87,7 @@ def main():
         converter = Hunyuan3DConverter(
             model_path=args.model_path,
             texture_model_path=args.model_path,
-            disable_texture=args.force_no_texture or args.texture_only
+            disable_texture=args.no_texture
         )
 
         # Appliquer le niveau de qualité demandé
@@ -101,17 +97,18 @@ def main():
             converter.enable_test_mode()  # Ultra-rapide pour tests
         elif args.quality == "medium":
             converter.enable_fast_mode()  # Équilibré
+        elif args.quality == "high":
+            # Mode haute qualité optimisé pour pièces (utilise les paramètres par défaut)
+            pass
         elif args.quality == "ultra":
             converter.enable_ultra_mode()  # Qualité maximale
-        elif args.quality == "high" and not args.disable_coin_mode:
-            converter.enable_coin_mode()  # Mode pièce optimisé (défaut)
 
         # Afficher le mode de couleur choisi
         if args.vertex_colors:
             print("🚀 Mode VERTEX COLORS activé")
             print("   ⚡ Couleurs rapides basées sur l'image d'entrée (2-5s)")
             print("   💡 Alternative ultra-rapide à la texture complète")
-        elif args.force_no_texture:
+        elif args.no_texture:
             print("🔘 Mode SANS COULEUR activé")
             print("   ⚡ Génération ultra-rapide sans texture ni couleur")
         else:
