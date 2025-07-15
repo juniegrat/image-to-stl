@@ -462,22 +462,14 @@ class Hunyuan3DConverter:
             return mesh
 
         try:
-            # Appliquer la texture avec loading bar
-            with tqdm(total=self.config['texture_steps'], desc="🎨 Application texture",
-                      unit="step", colour="blue") as pbar:
+            # Appliquer la texture
+            print("   🔄 Application de la texture en cours...")
 
-                def callback(step, timestep, latents):
-                    pbar.update(1)
-                    pbar.set_postfix({"timestep": f"{timestep:.1f}"})
-
-                textured_mesh = self.texture_pipeline(
-                    mesh,
-                    image=reference_image,
-                    guidance_scale=self.config['texture_guidance_scale'],
-                    num_inference_steps=self.config['texture_steps'],
-                    callback=callback,
-                    callback_steps=1
-                )
+            # Appeler le pipeline de texture avec les paramètres supportés uniquement
+            textured_mesh = self.texture_pipeline(
+                mesh,
+                image=reference_image
+            )
 
             print("   ✅ Texture appliquée avec succès")
             return textured_mesh
