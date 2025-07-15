@@ -114,7 +114,9 @@ def install_packages():
 
 def setup_triposr():
     """Clone TripoSR si nécessaire"""
-    triposr_path = Path("TripoSR")
+    # Calculer le chemin vers TripoSR depuis ce fichier
+    current_dir = Path(__file__).parent  # De tsr/ vers tsr/
+    triposr_path = current_dir.parent / "TripoSR"  # De tsr/ vers /TripoSR
 
     if triposr_path.exists():
         print("✅ TripoSR déjà présent")
@@ -201,7 +203,7 @@ def main():
     print("\n" + "=" * 50)
     print("🎉 Installation terminée avec succès!")
     print("\n💡 Vous pouvez maintenant utiliser:")
-    print("   python png-to-stl-local.py votre_image.png")
+    print("   python tsr/image-to-stl.py votre_image.png")
     print("\n📖 Consultez le README.md pour plus d'informations")
 
 

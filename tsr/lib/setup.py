@@ -109,7 +109,9 @@ def check_and_install_dependencies():
 
 def setup_triposr():
     """Clone et configure TripoSR si nécessaire - basé sur le script Google Colab"""
-    triposr_path = Path("TripoSR")
+    # Calculer le chemin vers TripoSR depuis ce fichier
+    current_dir = Path(__file__).parent.parent  # De tsr/lib/ vers tsr/
+    triposr_path = current_dir.parent / "TripoSR"  # De tsr/ vers /TripoSR
 
     if not triposr_path.exists():
         print("Clonage du dépôt TripoSR...")

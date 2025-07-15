@@ -25,11 +25,11 @@ def print_render_tips():
 
     print("\n🔧 Exemples de commandes:")
     print("   # Haute qualité")
-    print("   python image-to-stl.py image.png --render-resolution 1024 --render-elevation 20")
+    print("   python tsr/image-to-stl.py image.png --render-resolution 1024 --render-elevation 20")
     print("   # Vue rapprochée")
-    print("   python image-to-stl.py image.png --render-distance 1.6 --render-fov 35")
+    print("   python tsr/image-to-stl.py image.png --render-distance 1.6 --render-fov 35")
     print("   # Rotation ultra-fluide")
-    print("   python image-to-stl.py image.png --render-views 60")
+    print("   python tsr/image-to-stl.py image.png --render-views 60")
 
 
 def print_coin_tips():
@@ -50,8 +50,8 @@ def print_coin_tips():
     print("   • Images très détaillées: --foreground-ratio 0.7")
     print("")
     print("🚀 EXEMPLES DE COMMANDES:")
-    print("   • Standard: python png-to-stl-local.py ma_piece.png")
-    print("   • Avec revers: python png-to-stl-local.py recto.png --reverse-image verso.png")
-    print("   • Très haute qualité: python png-to-stl-local.py piece.png --mc-resolution 1024")
-    print("   • Supprimer fond: python png-to-stl-local.py piece.jpg --remove-bg")
+    print("   • Standard: python tsr/image-to-stl.py ma_piece.png")
+    print("   • Avec revers: python tsr/image-to-stl.py recto.png --reverse-image verso.png")
+    print("   • Très haute qualité: python tsr/image-to-stl.py piece.png --mc-resolution 1024")
+    print("   • Supprimer fond: python tsr/image-to-stl.py piece.jpg --remove-bg")
     print("")

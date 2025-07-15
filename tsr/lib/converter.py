@@ -33,7 +33,10 @@ def convert_png_to_stl(input_image_path, output_dir="output", remove_bg=True, re
     # 1) Vérifier/installer TripoSR et ses dépendances
     setup_triposr()
 
-    run_py = Path("TripoSR") / "run.py"
+    # Calculer le chemin vers TripoSR depuis ce fichier
+    current_dir = Path(__file__).parent.parent  # De tsr/lib/ vers tsr/
+    run_py = current_dir.parent / "TripoSR" / \
+        "run.py"  # De tsr/ vers /TripoSR/run.py
     if not run_py.exists():
         raise FileNotFoundError(
             f"Impossible de trouver {run_py}. Avez-vous bien cloné TripoSR ?")
