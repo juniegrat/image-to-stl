@@ -12,17 +12,14 @@ from pathlib import Path
 lib_path = Path(__file__).parent / 'lib'
 sys.path.insert(0, str(lib_path))
 
+
 try:
-    from hunyuan3d_converter import Hunyuan3DConverter, get_hunyuan3d_info
+    from lib.hunyuan3d_converter import Hunyuan3DConverter, get_hunyuan3d_info
 except ImportError:
-    # Fallback si l'import direct échoue
-    try:
-        from lib.hunyuan3d_converter import Hunyuan3DConverter, get_hunyuan3d_info
-    except ImportError:
-        print("❌ Erreur : Impossible d'importer les modules Hunyuan3D")
-        print("💡 Vérifiez que le dossier 'lib' contient hunyuan3d_converter.py")
-        print(f"💡 Chemin recherché : {lib_path}")
-        sys.exit(1)
+    print("❌ Erreur : Impossible d'importer les modules Hunyuan3D")
+    print("💡 Vérifiez que le dossier 'lib' contient hunyuan3d_converter.py")
+    print(f"💡 Chemin recherché : {lib_path}")
+    sys.exit(1)
 
 
 def main():
