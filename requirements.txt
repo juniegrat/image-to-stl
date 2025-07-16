@@ -1,0 +1,53 @@
+# Requirements.txt pour Hunyuan3D-2 Architecture Modulaire
+# Python 3.11.9 + CUDA 12.8 + PyTorch 2.7.1
+# Analysé et commenté pour compatibilité optimale
+
+# === CORE ML/AI PACKAGES ===
+accelerate==0.26.1          # ✅ Accélération Transformers/Diffusers - Version stable
+diffusers==0.34.0           # ✅ ESSENTIEL - Version récente compatible avec HF Hub
+transformers==4.53.2        # ✅ ESSENTIEL - Version récente, compatible avec hy3dgen
+huggingface_hub==0.33.4     # ✅ ESSENTIEL - API récente pour téléchargement modèles
+safetensors==0.5.3          # ✅ Format sécurisé pour modèles
+sageattention==1.0.6        # ✅ Optimisation attention moderne - Très récent
+
+# === PYTORCH ECOSYSTEM ===
+torch==2.7.1+cu128          # ✅ ESSENTIEL - Version récente avec CUDA 12.8
+torchvision==0.22.1+cu128   # ✅ Compatible avec torch 2.7.1+cu128
+xformers==0.0.31.post1      # ✅ Optimisations attention compatible PyTorch 2.7
+torchmcubes==0.1.0          # ✅ ESSENTIEL - Marching cubes pour extraction surfaces
+
+# === SCIENTIFIC COMPUTING ===
+numpy==2.3.1                # ✅ Version 2.x récente - Performance optimisée
+scipy>=1.10.0,<1.15.0       # 🔧 CORRIGÉ: Version stable, évite conflits
+einops==0.8.1               # ✅ ESSENTIEL - Réarrangements tenseurs élégants
+tqdm==4.67.1                # ✅ Progress bars - Version récente
+
+# === IMAGE PROCESSING ===
+Pillow==11.3.0              # ✅ ESSENTIEL - Traitement images, version récente
+opencv_contrib_python==4.11.0.86    # ✅ ESSENTIEL - Inclut opencv_python + modules extra
+# opencv_python==4.11.0.86           # 🔧 RETIRÉ: Conflit avec opencv_contrib_python
+# opencv_python_headless==4.11.0.86  # 🔧 RETIRÉ: Redondant avec opencv_contrib_python
+imageio==2.37.0             # ✅ Lecture/écriture images et vidéos
+scikit-image>=0.21.0        # 🔧 CORRIGÉ: était skimage==0.0 (version invalide)
+matplotlib==3.10.3          # ✅ Visualisation et plotting
+
+# === 3D PROCESSING ===
+trimesh==4.0.5              # ✅ ESSENTIEL - Traitement mesh, version récente
+pyrender==0.1.45            # ✅ ESSENTIEL - Rendu 3D pour architecture modulaire
+pygltflib==1.16.4           # ✅ Support formats 3D (GLB/GLTF)
+pymeshlab==2023.12.post3    # ✅ Traitement mesh avancé - Version récente
+xatlas==0.0.9               # ✅ UV mapping automatique
+torch_cluster==1.6.3        # ⚠️  OPTIONNEL: Clustering sur GPU, peut être retiré si non utilisé
+
+# === WEB/API FRAMEWORKS ===
+fastapi==0.116.1            # ⚠️  OPTIONNEL: Pour API web, retirer si interface CLI uniquement
+gradio==5.37.0              # ⚠️  OPTIONNEL: Interface web, retirer si non nécessaire
+uvicorn==0.35.0             # ⚠️  OPTIONNEL: Serveur ASGI, dépend de FastAPI/Gradio
+
+# === SPECIALIZED TOOLS ===
+bpy==4.4.0                  # ⚠️  LOURD: Blender Python API, retirer si pas de scripts Blender
+diso==0.1.4                 # ❓ INCONNU: Package peu documenté, vérifier utilité
+pybind11==3.0.0             # ✅ Bindings C++ - Nécessaire pour extensions
+PyYAML==6.0.2               # ✅ Configuration files
+Requests==2.32.4            # ✅ HTTP requests
+setuptools==65.5.0          # ✅ Build tools - Version stable

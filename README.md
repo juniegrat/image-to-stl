@@ -1,167 +1,146 @@
 # Image to STL Converter
 
-Convertit des images en modèles STL 3D imprimables, avec support pour TripoSR et Hunyuan3D-2.
+Convertisseur d'images en modèles STL 3D utilisant deux approches complémentaires :
 
-## 🚀 Fonctionnalités
+- **TripoSR** : Conversion rapide et efficace
+- **Hunyuan3D-2** : Qualité maximale avec architecture modulaire
 
-- **Conversion d'images en STL** : PNG, WebP, JPEG, BMP, TIFF
-- **Support multi-modèles** : TripoSR et Hunyuan3D-2mv
-- **Génération vidéo 360°** : Rotation automatique du modèle
-- **Post-processing avancé** : Optimisation pour impression 3D
-- **Compatibilité TripoSR** : Utilise les mêmes utilitaires de rendu
-- **Suppression d'arrière-plan** : Avec rembg intégré
-- **Mode multi-view** : Support avers/revers pour pièces
+## 🏗️ Architecture Modulaire Hunyuan3D-2
 
-## 📦 Installation
+Le projet utilise désormais une **architecture modulaire** pour Hunyuan3D-2 avec des composants spécialisés :
 
-### 1. Cloner le projet
+### 📦 Modules Spécialisés (`lib/`)
 
-```bash
-git clone https://github.com/votre-repo/image-to-stl.git
-cd image-to-stl
-```
+- **`hunyuan3d_config.py`** - Configuration et modes de qualité (DEBUG, TEST, FAST, HIGH, ULTRA)
+- **`hunyuan3d_models.py`** - Gestion des modèles et pipelines
+- **`hunyuan3d_camera.py`** - Utilitaires de caméra et rayons
+- **`hunyuan3d_rendering.py`** - Rendu 3D et génération vidéos
+- **`hunyuan3d_mesh_processing.py`** - Traitement et optimisation mesh
+- **`hunyuan3d_image_processing.py`** - Traitement d'images
+- **`hunyuan3d_converter.py`** - Convertisseur principal modulaire
+- **`hunyuan3d_utils.py`** - Compatibilité avec ancien code
 
-### 2. Installer les dépendances
-
-#### Pour TripoSR (recommandé)
+### 🔧 Installation
 
 ```bash
-pip install -r requirements.txt
-python image-to-stl.py --setup
+# Installation avec versions validées
+python install-hunyuan3d.py
+
+# Ou directement depuis lib/
+python lib/install-hunyuan3d.py
 ```
 
-#### Pour Hunyuan3D-2mv (haute fidélité)
+Le script d'installation utilise maintenant `requirements.txt` avec des **versions validées et testées** pour **Python 3.11.9** :
+
+- PyTorch 2.7.1 avec CUDA 12.8
+- Diffusers 0.34.0 (récente)
+- Transformers 4.53.2 (récente)
+- HuggingFace Hub 0.33.4 (récente)
+- NumPy 2.3.1 (version 2.x)
+- Et toutes les dépendances compatibles
+
+## 🚀 Utilisation
+
+### Conversion Simple
 
 ```bash
-pip install -r requirements-hunyuan3d.txt
-python hunyuan3d-coin-to-stl.py --setup
+python hunyuan3d-coin-to-stl.py image.jpg
 ```
 
-## 🔧 Utilisation
-
-### TripoSR (Standard)
+### Conversion Avers/Revers
 
 ```bash
-# Conversion basique
-python image-to-stl.py image.png
-
-# Avec paramètres avancés
-python image-to-stl.py image.png --mc-resolution 512 --render-views 60
-
-# Mode pièce avec avers/revers
-python image-to-stl.py avers.png --reverse-image revers.png
+python hunyuan3d-coin-to-stl.py avers.jpg -b revers.jpg
 ```
 
-### Hunyuan3D-2mv (Haute fidélité avec compatibilité TripoSR)
+### Modes de Qualité
 
 ```bash
-# Conversion basique
-python hunyuan3d-coin-to-stl.py avers.png
+# Ultra qualité (recommandé pour pièces)
+python hunyuan3d-coin-to-stl.py image.jpg --quality-preset ultra
 
-# Avec paramètres TripoSR compatibles
-python hunyuan3d-coin-to-stl.py avers.png --n-views 60 --height 1024 --width 1024
+# Mode rapide
+python hunyuan3d-coin-to-stl.py image.jpg --quality-preset fast
 
-# Mode multi-view avec suppression d'arrière-plan TripoSR
-python hunyuan3d-coin-to-stl.py avers.png -b revers.png --remove-bg
-
-# Paramètres de caméra avancés (compatibles TripoSR)
-python hunyuan3d-coin-to-stl.py piece.png --camera-distance 2.5 --elevation-deg 15 --fovy-deg 50
+# Mode test (développement)
+python hunyuan3d-coin-to-stl.py image.jpg --quality-preset test
 ```
 
-## 🎬 Nouveaux paramètres de rendu (compatibles TripoSR)
-
-### Paramètres de caméra
-
-- `--n-views` : Nombre de vues pour la vidéo (défaut: 30)
-- `--height` / `--width` : Résolution de rendu (défaut: 512x512)
-- `--elevation-deg` : Angle d'élévation en degrés (défaut: 0.0)
-- `--camera-distance` : Distance de la caméra (défaut: 1.9)
-- `--fovy-deg` : Champ de vision vertical (défaut: 40.0)
-
-### Traitement d'image
-
-- `--foreground-ratio` : Ratio de l'objet dans l'image (défaut: 0.85)
-- `--remove-bg` : Suppression d'arrière-plan avec rembg (TripoSR)
-
-### Exemples d'utilisation avancée
+### Informations Système
 
 ```bash
-# Rendu haute qualité
-python hunyuan3d-coin-to-stl.py piece.png --n-views 120 --height 1024 --width 1024 --fps 60
-
-# Vue rapprochée avec angle
-python hunyuan3d-coin-to-stl.py piece.png --camera-distance 1.5 --elevation-deg 20
-
-# Champ de vision large
-python hunyuan3d-coin-to-stl.py piece.png --fovy-deg 60 --remove-bg
+python hunyuan3d-coin-to-stl.py --info
 ```
 
-## 🔄 Compatibilité TripoSR
-
-Les scripts Hunyuan3D utilisent maintenant les mêmes utilitaires que TripoSR :
-
-### Fonctionnalités partagées
-
-- **Suppression d'arrière-plan** : `rembg` avec session réutilisable
-- **Redimensionnement** : `resize_foreground` avec ratio configurable
-- **Génération vidéo** : `save_video` avec imageio
-- **Paramètres de caméra** : Mêmes conventions que TripoSR
-
-### Avantages
-
-- **Cohérence** : Même comportement entre les deux systèmes
-- **Performance** : Réutilisation des optimisations TripoSR
-- **Maintenance** : Code unifié pour le rendu
-
-## 📊 Comparaison des modèles
-
-| Modèle        | Qualité    | Vitesse    | Multi-view | Texture    | Compatibilité TripoSR |
-| ------------- | ---------- | ---------- | ---------- | ---------- | --------------------- |
-| TripoSR       | ⭐⭐⭐⭐   | ⭐⭐⭐⭐⭐ | ❌         | ⭐⭐⭐     | ✅ Natif              |
-| Hunyuan3D-2mv | ⭐⭐⭐⭐⭐ | ⭐⭐⭐     | ✅         | ⭐⭐⭐⭐⭐ | ✅ Compatible         |
-
-## 🛠️ Diagnostic et dépannage
-
-### Vérifier l'environnement
-
-```bash
-# TripoSR
-python image-to-stl.py --debug
-
-# Hunyuan3D
-python hunyuan3d-coin-to-stl.py --setup
-```
-
-### Problèmes courants
-
-- **Mémoire GPU insuffisante** : Réduisez `--height` et `--width`
-- **Rendu lent** : Diminuez `--n-views`
-- **Qualité insuffisante** : Augmentez la résolution et utilisez `--remove-bg`
-
-## 📁 Structure du projet
+## 📁 Structure du Projet
 
 ```
 image-to-stl/
-├── lib/
-│   ├── converter.py              # Convertisseur TripoSR
-│   ├── hunyuan3d_converter.py    # Convertisseur Hunyuan3D (compatible TripoSR)
-│   ├── image_processor.py        # Traitement d'images
-│   └── utils.py                  # Utilitaires partagés
-├── TripoSR/                      # Sous-module TripoSR
-├── image-to-stl.py              # Script principal TripoSR
-├── hunyuan3d-coin-to-stl.py     # Script Hunyuan3D compatible TripoSR
-└── requirements*.txt             # Dépendances
+├── lib/                          # Modules spécialisés
+│   ├── hunyuan3d_*.py           # Architecture modulaire
+│   └── install-hunyuan3d.py     # Installateur principal
+├── install-hunyuan3d.py         # Wrapper d'installation
+├── requirements.txt              # Versions validées (Python 3.11.9)
+├── hunyuan3d-coin-to-stl.py     # Script principal
+├── tsr/                          # TripoSR
+├── Hunyuan3D-2/                  # Modèles Hunyuan3D
+└── output_hunyuan3d/             # Résultats
+
 ```
 
-## 🤝 Contribution
+## ✨ Avantages de l'Architecture Modulaire
 
-Les contributions sont les bienvenues ! Veuillez :
+- **Modularity** : Chaque module a une responsabilité unique
+- **Maintainability** : Code organisé et plus facile à déboguer
+- **Reusability** : Modules utilisables indépendamment
+- **Extensibility** : Nouvelles fonctionnalités sans impact sur le reste
+- **Backward Compatibility** : L'ancien code continue de fonctionner
+- **Performance** : Optimisations ciblées par module
 
-1. Maintenir la compatibilité TripoSR
-2. Tester avec les deux modèles
-3. Documenter les nouveaux paramètres
-4. Respecter les conventions de nommage TripoSR
+## 🔧 Versions Compatibles (Validées Python 3.11.9)
 
-## 📄 Licence
+L'installateur utilise des **versions spécifiquement testées** avec **Python 3.11.9** :
 
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
+| Package         | Version      | Statut                    |
+| --------------- | ------------ | ------------------------- |
+| PyTorch         | 2.7.1+cu128  | ✅ Récent avec CUDA 12.8  |
+| Diffusers       | 0.34.0       | ✅ Version récente        |
+| Transformers    | 4.53.2       | ✅ Version récente        |
+| HuggingFace Hub | 0.33.4       | ✅ API récente            |
+| xFormers        | 0.0.31.post1 | ✅ Compatible PyTorch 2.7 |
+| NumPy           | 2.3.1        | ✅ Version 2.x récente    |
+| Pillow          | 11.3.0       | ✅ Version récente        |
+| Trimesh         | 4.0.5        | ✅ Version récente        |
+
+## 🏃 Modes de Qualité
+
+- **DEBUG** : Ultra-minimal, 256x256, 15 steps (test instantané)
+- **TEST** : Ultra-rapide, 10 steps (développement)
+- **FAST** : Compromis qualité/vitesse, 512x512, 50 steps
+- **HIGH** : Optimisé pièces, 1024x1024, 100 steps
+- **ULTRA** : Qualité maximale, 150 steps
+
+## ⚠️ Configuration Recommandée
+
+**Configuration validée et testée :**
+
+- **Python 3.11.9** (version recommandée)
+- **CUDA 12.8** (dernière version stable)
+- **PyTorch 2.7.1+cu128** (compatible CUDA 12.8)
+- **GPU NVIDIA** avec drivers récents
+
+**Notes de compatibilité :**
+
+- Redémarrer le terminal après installation
+- Modèles téléchargés automatiquement au premier usage
+- Architecture modulaire optimisée pour performances
+
+## 📊 Performance
+
+L'architecture modulaire avec les versions récentes permet :
+
+- Conversion rapide en mode FAST (2-3 min)
+- Qualité maximale en mode ULTRA (10-15 min)
+- Debug instantané pour tests (<30 sec)
+- Optimisations GPU/CPU automatiques avec PyTorch 2.7.1
+- Support natif NumPy 2.x pour meilleures performances
